@@ -113,3 +113,38 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    # Retrieves an object when given a valid class and ID
+    def test_retrieves_object_with_valid_class_and_id(self):
+        storage = FileStorage()
+        obj = BaseModel()
+        storage.new(obj)
+        retrieved_obj = storage.get(BaseModel, obj.id)
+        self.assertEqual(retrieved_obj, obj)
+
+    # Handles None as class or ID input
+    def test_handles_none_as_class_or_id(self):
+        storage = FileStorage()
+        self.assertIsNone(storage.get(None, "some_id"))
+        self.assertIsNone(storage.get(BaseModel, None))
+
+    # count all objects when no class is specified
+    def test_count_all_objects(self):
+        storage = FileStorage()
+        storage._FileStorage__objects = {
+            "BaseModel.1": BaseModel(),
+            "User.1": User(),
+            "Place.1": Place()
+        }
+        self.assertEqual(storage.count(), 3)
+
+    # count objects of a specific class when class is provided
+    def test_count_objects_of_specific_class(self):
+        storage = FileStorage()
+        storage._FileStorage__objects = {
+            "BaseModel.1": BaseModel(),
+            "User.1": User(),
+            "Place.1": Place(),
+            "Amenity.1": Amenity()
+        }
+        self.assertEqual(storage.count(Amenity), 1)
